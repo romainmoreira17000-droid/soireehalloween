@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Nuit des Fantômes</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#090612;
+  color:#fff;
+  min-height:100vh;
+}
+.app{
+  max-width:900px;
+  margin:auto;
+  padding:24px;
+}
+.card{
+  background:linear-gradient(145deg,#19102a,#0f0b19);
+  border:1px solid #503a70;
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 20px 60px #0008;
+}
+h1{
+  font-size:clamp(34px,7vw,64px);
+  margin:10px 0;
+  text-align:center;
+}
+h2{font-size:30px}
+p{font-size:18px;line-height:1.5}
+.subtitle{
+  text-align:center;
+  color:#d9c7ff;
+}
+button{
+  border:0;
+  border-radius:14px;
+  padding:15px 22px;
+  font-size:17px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#8d5cff;
+  color:white;
+  margin:7px;
+}
+button:hover{transform:scale(1.02)}
+.secondary{background:#302344}
+.badge{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:30px;
+  background:#2b1b40;
+  color:#d9c7ff;
+}
+.center{text-align:center}
+.hidden{display:none}
+.mission{
+  background:#120c1d;
+  border:1px solid #3d2a52;
+  border-radius:18px;
+  padding:18px;
+  margin:12px 0;
+}
+.option{
+  width:100%;
+  text-align:left;
+  background:#211633;
+}
+.option.correct{background:#197044}
+.option.wrong{background:#7b2638}
+.score{
+  font-size:28px;
+  text-align:center;
+  margin:20px;
+}
+.timer{
+  font-size:48px;
+  text-align:center;
+  font-weight:bold;
+}
+.big{
+  font-size:80px;
+  text-align:center;
+}
+input{
+  width:100%;
+  padding:15px;
+  border-radius:12px;
+  border:1px solid #65517d;
+  background:#0d0914;
+  color:white;
+  font-size:18px;
+  margin:8px 0;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<div id="home" class="card">
+  <div class="center">
+    <span class="badge">🎃 SOIRÉE HALLOWEEN</span>
+  </div>
+
+  <h1>👻 LA NUIT DES FANTÔMES</h1>
+
+  <p class="subtitle">
+    <b>Le Mystère de la Pierre de Lune</b><br>
+    Une aventure à jouer en famille.
+  </p>
+
+  <div class="mission">
+    <h2>🌙 Votre mission</h2>
+    <p>
+      La Pierre de Lune a disparu !<br>
+      Sept épreuves vous attendent pour retrouver le coupable
+      et ouvrir le coffre maudit.
+    </p>
+  </div>
+
+  <div class="center">
+    <button onclick="startGame()">🎃 COMMENCER L'AVENTURE</button>
+  </div>
+</div>
+
+
+<div id="game" class="card hidden">
+  <div class="center">
+    <span id="missionBadge" class="badge"></span>
+  </div>
+
+  <h2 id="title"></h2>
+  <p id="story"></p>
+
+  <div id="content"></div>
+
+  <div class="score">
+    ⭐ Score : <span id="score">0</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+let mission=0;
+let score=0;
+
+const missions=[
+
+{
+title:"👁️ Mission 1 — Les Yeux du Vampire",
+story:"Observez attentivement la scène. Chaque détail peut devenir un indice.",
+question:"Dans la scène, quelle créature se trouve près de la maison ?",
+answers:["🦇 Une chauve-souris","🐸 Une grenouille","🐺 Un loup","🕷️ Une araignée"],
+correct:0
+},
+
+{
+title:"🔊 Mission 2 — La Maison aux Bruits",
+story:"Un bruit étrange vient de la maison hantée. À votre avis, quel animal pourrait produire ce son ?",
+question:"Quel son reconnaissez-vous le plus probablement ?",
+answers:["🐱 Un chat","🐮 Une vache","🐓 Un coq","🐘 Un éléphant"],
+correct:0
+},
+
+{
+title:"🧪 Mission 3 — Le Laboratoire de Crochepatte",
+story:"La sorcière a préparé trois potions. Une seule permet d'ouvrir la porte secrète.",
+question:"Quelle potion est logique si la rouge est interdite et la verte est vide ?",
+answers:["🟣 La potion violette","🔴 La potion rouge","🟢 La potion verte","⚫ Aucune"],
+correct:0
+},
+
+{
+title:"🕵️ Mission 4 — Le Vol de la Pierre de Lune",
+story:"Trois suspects étaient dans le château. Le coupable a laissé une trace de boue.",
+question:"Qui est le suspect le plus logique si une seule personne avait les chaussures couvertes de boue ?",
+answers:["🧙 La sorcière","🧛 Le vampire","👻 Le fantôme","🧟 Le zombie"],
+correct:1
+},
+
+{
+title:"🎃 Mission 5 — Les Objets Maudits",
+story:"Cette fois, tout le monde se lève ! Cherchez dans la salle l'objet ou le symbole demandé par l'organisateur.",
+question:"Quel objet votre équipe doit-elle trouver ?",
+answers:["🎃 Une citrouille","🕯️ Une bougie","🦇 Une chauve-souris","🔑 Une clé"],
+correct:3
+},
+
+{
+title:"🧙 Mission 6 — Les Défis des Sorciers",
+story:"Un membre de la famille mime un fantôme. Les autres doivent deviner avant la fin du temps.",
+question:"Votre équipe réussit-elle le défi ?",
+answers:["✨ Oui !","😈 Presque","💀 Non"],
+correct:0
+},
+
+{
+title:"🔐 Mission 7 — Le Coffre Maudit",
+story:"Vous avez retrouvé les indices. Il faut maintenant ouvrir le coffre.",
+question:"Quel code final choisissez-vous ?",
+answers:["1313","6666","2024","0427"],
+correct:0
+}
+
+];
+
+function startGame(){
+  mission=0;
+  score=0;
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  showMission();
+}
+
+function showMission(){
+
+  const m=missions[mission];
+
+  document.getElementById("missionBadge").textContent=
+    "MISSION "+(mission+1)+" / "+missions.length;
+
+  document.getElementById("title").textContent=m.title;
+  document.getElementById("story").textContent=m.story;
+
+  const content=document.getElementById("content");
+
+  content.innerHTML=`
+    <div class="mission">
+      <div class="timer" id="timer">20</div>
+      <p><b>${m.question}</b></p>
+      ${m.answers.map((a,i)=>
+        `<button class="option" onclick="answer(${i})">${a}</button>`
+      ).join("")}
+    </div>
+  `;
+
+  document.getElementById("score").textContent=score;
+
+  startTimer();
+}
+
+function startTimer(){
+
+  let time=20;
+  const timer=document.getElementById("timer");
+
+  const interval=setInterval(()=>{
+
+    time--;
+
+    if(timer) timer.textContent=time;
+
+    if(time<=0){
+      clearInterval(interval);
+      disableAnswers();
+    }
+
+  },1000);
+}
+
+function disableAnswers(){
+
+  document.querySelectorAll(".option").forEach(b=>{
+    b.disabled=true;
+  });
+
+  setTimeout(nextMission,1200);
+}
+
+function answer(i){
+
+  const m=missions[mission];
+  const buttons=document.querySelectorAll(".option");
+
+  buttons.forEach(b=>b.disabled=true);
+
+  if(i===m.correct){
+
+    buttons[i].classList.add("correct");
+    score+=100;
+
+  }else{
+
+    buttons[i].classList.add("wrong");
+    buttons[m.correct].classList.add("correct");
+
+  }
+
+  document.getElementById("score").textContent=score;
+
+  setTimeout(nextMission,1300);
+}
+
+function nextMission(){
+
+  mission++;
+
+  if(mission>=missions.length){
+    finish();
+    return;
+  }
+
+  showMission();
+}
+
+function finish(){
+
+  document.getElementById("missionBadge").textContent="🏆 FIN DU JEU";
+
+  document.getElementById("title").textContent=
+    "🎉 LA PIERRE DE LUNE EST RETROUVÉE !";
+
+  document.getElementById("story").textContent=
+    "Bravo à toute la famille ! Vous avez traversé les sept épreuves.";
+
+  document.getElementById("content").innerHTML=`
+    <div class="mission center">
+      <div class="big">🏆</div>
+      <h2>Score final</h2>
+      <div class="score">${score} points</div>
+      <p>
+        L'organisateur peut maintenant annoncer
+        le classement des familles !
+      </p>
+      <button onclick="location.reload()">🔄 Rejouer</button>
+    </div>
+  `;
+
+  document.getElementById("score").textContent=score;
+}
+
+</script>
+</body>
+</html>
